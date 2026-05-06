@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sum 15</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;}
+body {font-family:Arial,sans-serif;background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:15px;}
+h1 {font-size:2.5rem;margin-bottom:10px;}
+#turn {font-size:1.4rem;font-weight:bold;padding:10px 25px;border-radius:25px;background:rgba(255,255,255,0.2);margin:15px 0;}
+.p1 {color:#4db8ff;}
+.p2 {color:#ff5757;}
+.board {display:grid;grid-template-columns:repeat(3,100px);grid-template-rows:repeat(3,100px);gap:12px;margin:20px 0;}
+.cell {background:rgba(255,255,255,0.2);border:3px solid rgba(255,255,255,0.4);border-radius:15px;font-size:3rem;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.1s;}
+.cell:active {transform:scale(0.95);}
+.cell.used {opacity:0.6;cursor:not-allowed;}
+.cell.p1 {background:#4db8ff;border-color:#4db8ff;}
+.cell.p2 {background:#ff5757;border-color:#ff5757;}
+.cell.disabled {opacity:0.3;}
+button {background:#00c896;color:white;border:none;padding:15px 40px;font-size:1.2rem;border-radius:30px;cursor:pointer;font-weight:bold;margin-top:10px;}
+.popup {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;}
+.popup-content {background:#2a5298;padding:40px;border-radius:20px;text-align:center;}
+.score {display:flex;gap:30px;margin:15px 0;font-size:1.2rem;}
+</style>
+</head>
+<body>
+<h1>Sum 15</h1>
+<div class="score">
+<span class="p1">لاعب 1: <b id="score1">0</b></span>
+<span class="p2">لاعب 2: <b id="score2">0</b></span>
+</div>
+<div id="turn" class="p1">دور اللاعب 1 - اختر رقم فردي</div>
+<div class="board" id="board"></div>
+<button onclick="resetGame()">لعبة جديدة</button>
+<div class="popup" id="popup">
+<div class="popup-content">
+<h2 id="winText" style="margin-bottom:20px;font-size:2rem;"></h2>
+<button onclick="resetGame()">العب مرة ثانية</button>
+</div>
+</div>
+<script>
+let numbers,p1Nums,p2Nums,usedNums,player,over,s1=0,s2=0;
+const board=document.getElementById('board');
+const turnEl=document.getElementById('turn');
+const popup=document.getElementById('popup');
+const winText=document.getElementById('winText');
+
+function start(){
+numbers=[1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5);
+board.innerHTML='';
+p1Nums=[];p2Nums=[];usedNums=[];player=1;over=false;popup.style.display='none';
+numbers.forEach(num=>{
+const cell=document.createElement('div');
+cell.className='cell';
+cell.textContent=num;
+cell.onclick=()=>pick(num,cell);
+board.appendChild(cell);
+});
+updateTurn();
+updateDisabled();
+}
+
+function pick(num,cell){
+if(over||usedNums.includes(num))return;
+// هذا الشرط المهم: لاعب 1 فردي، لاعب 2 زوجي
+if(player===1&&num%2===0)return;
+if(player===2&&num%2===1)return;
+
+usedNums.push(num);
+cell.classList.add('used');
+if(player===1){p1Nums.push(num);cell.classList.add('p1');}
+else{p2Nums.push(num);cell.classList.add('p2');}
+
+if(win(player===1?p1Nums:p2Nums)){
+end(`اللاعب ${player} فاز!`);
+if(player===1)s1++;else s2++;
+document.getElementById('score1').textContent=s1;
+document.getElementById('score2').textContent=s2;
+}else if(usedNums.length===9){
+end('تعادل!');
+}else{
+player=player===1?2:1;
+updateTurn();
+updateDisabled();
+}
+}
+
+function updateDisabled(){
+document.querySelectorAll('.cell').forEach(cell=>{
+const num=parseInt(cell.textContent);
+if(!cell.classList.contains('used')){
+if(player===1&&num%2===0)cell.classList.add('disabled');
+else if(player===2&&num%2===1)cell.classList.add('disabled');
+else cell.classList.remove('disabled');
+}
+});
+}
+
+function win(arr){
+if(arr.length<3)return false;
+for(let i=0;i<arr.length;i++){
+for(let j=i+1;j<arr.length;j++){
+for(let k=j+1;k<arr.length;k++){
+if(arr[i]+arr[j]+arr[k]===15)return true;
+}
+}
+}
+return false;
+}
+
+function updateTurn(){
+turnEl.textContent=`دور اللاعب ${player} - اختر رقم ${player===1?'فردي':'زوجي'}`;
+turnEl.className=player===1?'p1':'p2';
+}
+
+function end(msg){
+over=true;
+winText.textContent=msg;
+popup.style.display='flex';
+}
+
+function resetGame(){start();}
+start();
+</script>
+</body>
+</html>
