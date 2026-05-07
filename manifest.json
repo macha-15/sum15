@@ -1,0 +1,9 @@
+{
+  "name": "Sum15",
+  "short_name": "Sum15",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1e3c72",
+  "theme_color": "#1e3c72",
+  "description": "لعبة جمع الأرقام حتى 15"
+}
